@@ -1,0 +1,42 @@
+version: '3.2'
+
+services:
+
+  domainController:
+    image: jboss/wildfly:23.0.1.Final
+    command: bash -c "/opt/jboss/wildfly/bin/add-user.sh admin admin --silent && /opt/jboss/wildfly/bin/domain.sh -b 0.0.0.0 -bmanagement 0.0.0.0"
+    volumes:
+      - ./configuration/domain.xml:/opt/jboss/wildfly/domain/configuration/domain.xml
+      - ./configuration/host-master.xml:/opt/jboss/wildfly/domain/configuration/host.xml
+    ports:
+      - "9990:9990"
+      - "9999:9999"
+    environment:
+      FOO: bar
+
+  hostController_1:
+    depends_on:
+      - domainController
+    image: jboss/wildfly:23.0.1.Final
+    command: bash -c "/opt/jboss/wildfly/bin/add-user.sh admin admin --silent && /opt/jboss/wildfly/bin/domain.sh -b 0.0.0.0 -bmanagement 0.0.0.0 -Djboss.domain.master.address=domainController"
+    volumes:
+      - ./configuration/domain.xml:/opt/jboss/wildfly/domain/configuration/domain.xml
+      - ./configuration/host-slave-1.xml:/opt/jboss/wildfly/domain/configuration/host.xml
+    ports:
+      - "19990:19990"
+    environment:
+      FOO: bar
+
+  hostController_2:
+    depends_on:
+      - domainController
+    image: jboss/wildfly:23.0.1.Final
+    command: bash -c "/opt/jboss/wildfly/bin/add-user.sh admin admin --silent && /opt/jboss/wildfly/bin/domain.sh -b 0.0.0.0 -bmanagement 0.0.0.0 -Djboss.domain.master.address=domainController"
+    volumes:
+      - ./configuration/domain.xml:/opt/jboss/wildfly/domain/configuration/domain.xml
+      - ./configuration/host-slave-2.xml:/opt/jboss/wildfly/domain/configuration/host.xml
+    ports:
+      - "29990:29990"
+    environment:
+      FOO: bar
+
